@@ -11,9 +11,8 @@ pub enum Token {
     Int,
     Return,
 
+    #[allow(unused)]
     Identifier(String),
-
-    Constant(String),
 
     // Symbols
     OpenParen,
@@ -23,7 +22,33 @@ pub enum Token {
     Semicolon,
 
     // Literals
+    #[allow(unused)]
     IntLiteral(String),
+}
+
+impl<'a> Iterator for Lexer<'a> {
+    type Item = Token;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // Skip whitespace before each token
+        self.skip_whitespace();
+
+        // Get the next character
+        let c = self.advance()?;
+
+        // Match single-character tokens
+        let token = match c {
+            '{' => Token::OpenBrace,
+            '}' => Token::CloseBrace,
+            '(' => Token::OpenParen,
+            ')' => Token::CloseParen,
+            ';' => Token::Semicolon,
+            // Delegate to complex token handler for everything else
+            _ => return self.lex_complex_token(c),
+        };
+
+        Some(token)
+    }
 }
 
 impl<'a> Lexer<'a> {
@@ -44,7 +69,7 @@ impl<'a> Lexer<'a> {
     }
 
     fn skip_whitespace(&mut self) {
-        while self.peek().map_or(false, |c| c.is_whitespace()) {
+        while self.peek().is_some_and(|c| c.is_whitespace()) {
             self.advance();
         }
     }
@@ -97,30 +122,5 @@ impl<'a> Lexer<'a> {
         }
 
         Token::IntLiteral(literal)
-    }
-}
-
-impl<'a> Iterator for Lexer<'a> {
-    type Item = Token;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        // Skip whitespace before each token
-        self.skip_whitespace();
-
-        // Get the next character
-        let c = self.advance()?;
-
-        // Match single-character tokens
-        let token = match c {
-            '{' => Token::OpenBrace,
-            '}' => Token::CloseBrace,
-            '(' => Token::OpenParen,
-            ')' => Token::CloseParen,
-            ';' => Token::Semicolon,
-            // Delegate to complex token handler for everything else
-            _ => return self.lex_complex_token(c),
-        };
-
-        Some(token)
     }
 }
