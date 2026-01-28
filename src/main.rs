@@ -18,7 +18,7 @@ fn main() -> io::Result<()> {
 
 fn run_file(path: &str) -> io::Result<()> {
     let source = fs::read_to_string(path)?;
-    let lexer = Lexer::new(source);
+    let lexer = Lexer::new(&source);
     for token in lexer {
         println!("{:?}", &token);
     }
